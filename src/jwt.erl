@@ -9,6 +9,8 @@
 -export([decode/2]).
 -export([encode/3, encode/4]).
 
+-compile(nowarn_deprecated_function).
+
 -define(HOUR, 3600).
 -define(DAY, 3600 * 60).
 
@@ -127,4 +129,11 @@ algorithm_to_crypto(<<"HS384">>) -> sha384;
 algorithm_to_crypto(<<"HS512">>) -> sha512;
 algorithm_to_crypto(_)           -> undefined.
 
-epoch() -> erlang:system_time(seconds).
+epoch() ->
+    try
+        erlang:system_time(seconds)
+    catch
+        error:undef ->
+            {MS, S, _US} = erlang:now(),
+            MS*1000000+S
+    end.
